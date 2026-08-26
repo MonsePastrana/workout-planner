@@ -62,38 +62,47 @@ export default function Home() {
       </header>
 
       {/* HERO */}
-      <section
-        id="home"
-        className="mx-auto flex min-h-[75vh] max-w-6xl items-center justify-center px-6 py-24 text-center"
-      >
-        <div className="max-w-4xl">
-          <p className="mb-5 font-bold uppercase tracking-[0.25em] text-purple-600">
-            Workout Planner
-          </p>
+      <section id="home" className="mx-auto max-w-6xl px-6 py-20">
+        <div className="grid items-center gap-12 md:grid-cols-2">
+          <div>
+            <p className="mb-5 font-bold uppercase tracking-[0.25em] text-purple-600">
+              Workout Planner
+            </p>
 
-          <h1 className="text-5xl font-black tracking-tight md:text-7xl">
-            Build a workout that fits your life.
-          </h1>
+            <h1 className="text-5xl font-black tracking-tight md:text-7xl">
+              Build a workout that fits your life.
+            </h1>
 
-          <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-zinc-600 md:text-xl">
-            Create and organize workout routines based on your goals,
-            experience level, available time, and weekly schedule.
-          </p>
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-zinc-600 md:text-xl">
+              Create and organize workout routines based on your goals,
+              experience level, available time, and weekly schedule.
+            </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <a
-              href="#product"
-              className="rounded-xl bg-purple-600 px-7 py-3 font-semibold text-white transition hover:bg-purple-700"
-            >
-              Explore the Product
-            </a>
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              <a
+                href="#product"
+                className="rounded-xl bg-purple-600 px-7 py-3 font-semibold text-white transition hover:bg-purple-700"
+              >
+                Explore the Product
+              </a>
 
-            <Link
-              href="/docs"
-              className="rounded-xl border border-zinc-300 px-7 py-3 font-semibold transition hover:border-purple-600 hover:text-purple-600"
-            >
-              Documentation
-            </Link>
+              <Link
+                href="/docs"
+                className="rounded-xl border border-zinc-300 px-7 py-3 font-semibold transition hover:border-purple-600 hover:text-purple-600"
+              >
+                Documentation
+              </Link>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-100 shadow-lg">
+            <Image
+              src="/gym-hero.jpg"
+              alt="People training in a gym"
+              width={900}
+              height={700}
+              className="h-full w-full object-cover"
+            />
           </div>
         </div>
       </section>
