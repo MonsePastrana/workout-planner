@@ -79,12 +79,12 @@ export default function Home() {
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <a
-                href="#product"
+              <Link
+                href="/core"
                 className="rounded-xl bg-purple-600 px-7 py-3 font-semibold text-white transition hover:bg-purple-700"
               >
-                Explore the Product
-              </a>
+                Build Your Workout
+              </Link>
 
               <Link
                 href="/docs"
@@ -112,9 +112,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-6xl gap-6 px-6 py-16 md:grid-cols-3">
           <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm">
             <div className="mb-4 text-3xl">🎯</div>
-
             <h3 className="text-xl font-bold">Goal Based</h3>
-
             <p className="mt-3 leading-7 text-zinc-600">
               Organize your workout plan around goals such as strength, muscle
               gain, general fitness, or weight management.
@@ -123,9 +121,7 @@ export default function Home() {
 
           <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm">
             <div className="mb-4 text-3xl">📅</div>
-
             <h3 className="text-xl font-bold">Built Around Your Time</h3>
-
             <p className="mt-3 leading-7 text-zinc-600">
               Workout Planner is designed for students and busy people who need
               routines that fit their available days and schedule.
@@ -134,9 +130,7 @@ export default function Home() {
 
           <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm">
             <div className="mb-4 text-3xl">🏋️</div>
-
             <h3 className="text-xl font-bold">Simple and Practical</h3>
-
             <p className="mt-3 leading-7 text-zinc-600">
               The goal is to make workout organization simple without
               overwhelming users with unnecessary complexity.
@@ -172,7 +166,7 @@ export default function Home() {
               href="/core"
               className="mt-8 inline-flex rounded-xl bg-purple-600 px-6 py-3 font-semibold text-white transition hover:bg-purple-700"
             >
-              Build Your Workout
+              Open Workout Generator
             </Link>
           </div>
 
@@ -214,11 +208,8 @@ export default function Home() {
           <div className="mt-14 grid gap-6 md:grid-cols-3">
             <div className="rounded-2xl border border-zinc-200 bg-white p-8">
               <span className="text-sm font-black text-purple-600">01</span>
-
               <div className="mt-5 text-4xl">🎯</div>
-
               <h3 className="mt-5 text-2xl font-bold">Choose Your Goal</h3>
-
               <p className="mt-4 leading-7 text-zinc-600">
                 Select the main fitness goal that will guide your workout
                 routine.
@@ -227,11 +218,8 @@ export default function Home() {
 
             <div className="rounded-2xl border border-zinc-200 bg-white p-8">
               <span className="text-sm font-black text-purple-600">02</span>
-
               <div className="mt-5 text-4xl">📆</div>
-
               <h3 className="mt-5 text-2xl font-bold">Set Your Schedule</h3>
-
               <p className="mt-4 leading-7 text-zinc-600">
                 Choose how many days per week you can train and how much time
                 you have available.
@@ -240,11 +228,8 @@ export default function Home() {
 
             <div className="rounded-2xl border border-zinc-200 bg-white p-8">
               <span className="text-sm font-black text-purple-600">03</span>
-
               <div className="mt-5 text-4xl">💪</div>
-
               <h3 className="mt-5 text-2xl font-bold">Build Your Workout</h3>
-
               <p className="mt-4 leading-7 text-zinc-600">
                 Workout Planner creates a structured routine using your selected
                 goal, experience level, schedule, and workout duration.
@@ -282,7 +267,6 @@ export default function Home() {
 
         <div className="mx-auto mt-12 max-w-md rounded-3xl border-2 border-purple-600 p-9 shadow-sm">
           <p className="font-bold text-purple-600">Development Preview</p>
-
           <h3 className="mt-4 text-4xl font-black">Free</h3>
 
           <p className="mt-4 text-zinc-600">
@@ -313,7 +297,6 @@ export default function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7">
               <h3 className="text-xl font-bold">Students</h3>
-
               <p className="mt-3 text-zinc-400">
                 Workout planning that can fit around classes and study time.
               </p>
@@ -321,7 +304,6 @@ export default function Home() {
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7">
               <h3 className="text-xl font-bold">Young Adults</h3>
-
               <p className="mt-3 text-zinc-400">
                 A simple way to organize training without needing complicated
                 planning tools.
@@ -330,7 +312,6 @@ export default function Home() {
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7">
               <h3 className="text-xl font-bold">Busy People</h3>
-
               <p className="mt-3 text-zinc-400">
                 Build exercise into a limited weekly schedule.
               </p>
