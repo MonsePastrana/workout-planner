@@ -1,496 +1,709 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { supabase } from "../../lib/supabase";
 
-export default function Home() {
+type Goal =
+  | "Muscle Gain"
+  | "Strength"
+  | "General Fitness"
+  | "Weight Loss";
+
+type Experience = "Beginner" | "Intermediate" | "Advanced";
+
+type DaysPerWeek = 2 | 3 | 4 | 5;
+
+type Duration = 30 | 45 | 60;
+
+type Exercise = {
+  name: string;
+  sets: number;
+  reps: string;
+};
+
+type WorkoutDay = {
+  day: number;
+  title: string;
+  focus: string;
+  exercises: Exercise[];
+};
+
+type SavedWorkout = {
+  id: string;
+  fitness_goal: string;
+  experience_level: string;
+  days_per_week: number;
+  workout_duration: number;
+  generated_workout: WorkoutDay[];
+  created_at: string;
+};
+
+const workoutTemplates: Record<
+  Goal,
+  {
+    title: string;
+    focus: string;
+    exercises: Exercise[];
+  }[]
+> = {
+  "Muscle Gain": [
+    {
+      title: "Push",
+      focus: "Chest, Shoulders, Triceps",
+      exercises: [
+        { name: "Bench Press", sets: 3, reps: "8–10" },
+        { name: "Shoulder Press", sets: 3, reps: "8–10" },
+        { name: "Incline Dumbbell Press", sets: 3, reps: "10–12" },
+        { name: "Lateral Raises", sets: 3, reps: "12–15" },
+        { name: "Triceps Extension", sets: 3, reps: "10–12" },
+      ],
+    },
+    {
+      title: "Pull",
+      focus: "Back, Biceps",
+      exercises: [
+        { name: "Lat Pulldown", sets: 3, reps: "8–10" },
+        { name: "Seated Row", sets: 3, reps: "8–10" },
+        { name: "Single Arm Row", sets: 3, reps: "10–12" },
+        { name: "Face Pulls", sets: 3, reps: "12–15" },
+        { name: "Biceps Curl", sets: 3, reps: "10–12" },
+      ],
+    },
+    {
+      title: "Legs",
+      focus: "Quads, Hamstrings, Glutes",
+      exercises: [
+        { name: "Squat", sets: 3, reps: "8–10" },
+        { name: "Romanian Deadlift", sets: 3, reps: "8–10" },
+        { name: "Leg Press", sets: 3, reps: "10–12" },
+        { name: "Leg Curl", sets: 3, reps: "10–12" },
+        { name: "Calf Raises", sets: 3, reps: "12–15" },
+      ],
+    },
+    {
+      title: "Upper Body",
+      focus: "Chest, Back, Shoulders, Arms",
+      exercises: [
+        { name: "Dumbbell Bench Press", sets: 3, reps: "8–10" },
+        { name: "Lat Pulldown", sets: 3, reps: "8–10" },
+        { name: "Shoulder Press", sets: 3, reps: "10–12" },
+        { name: "Biceps Curl", sets: 3, reps: "10–12" },
+        { name: "Triceps Pushdown", sets: 3, reps: "10–12" },
+      ],
+    },
+    {
+      title: "Lower Body",
+      focus: "Legs and Glutes",
+      exercises: [
+        { name: "Goblet Squat", sets: 3, reps: "10–12" },
+        { name: "Romanian Deadlift", sets: 3, reps: "10–12" },
+        { name: "Walking Lunges", sets: 3, reps: "10 each leg" },
+        { name: "Leg Curl", sets: 3, reps: "10–12" },
+        { name: "Calf Raises", sets: 3, reps: "12–15" },
+      ],
+    },
+  ],
+
+  Strength: [
+    {
+      title: "Upper Strength",
+      focus: "Chest, Back, Shoulders",
+      exercises: [
+        { name: "Bench Press", sets: 4, reps: "4–6" },
+        { name: "Barbell Row", sets: 4, reps: "4–6" },
+        { name: "Overhead Press", sets: 3, reps: "5–6" },
+        { name: "Lat Pulldown", sets: 3, reps: "6–8" },
+        { name: "Close-Grip Bench Press", sets: 3, reps: "6–8" },
+      ],
+    },
+    {
+      title: "Lower Strength",
+      focus: "Quads, Hamstrings, Glutes",
+      exercises: [
+        { name: "Back Squat", sets: 4, reps: "4–6" },
+        { name: "Romanian Deadlift", sets: 4, reps: "5–6" },
+        { name: "Leg Press", sets: 3, reps: "6–8" },
+        { name: "Split Squat", sets: 3, reps: "8 each leg" },
+        { name: "Calf Raises", sets: 3, reps: "10–12" },
+      ],
+    },
+    {
+      title: "Push Strength",
+      focus: "Chest, Shoulders, Triceps",
+      exercises: [
+        { name: "Bench Press", sets: 4, reps: "4–6" },
+        { name: "Overhead Press", sets: 4, reps: "4–6" },
+        { name: "Incline Press", sets: 3, reps: "6–8" },
+        { name: "Dips", sets: 3, reps: "6–8" },
+        { name: "Triceps Extension", sets: 3, reps: "8–10" },
+      ],
+    },
+    {
+      title: "Pull Strength",
+      focus: "Back, Biceps",
+      exercises: [
+        { name: "Barbell Row", sets: 4, reps: "4–6" },
+        { name: "Lat Pulldown", sets: 4, reps: "6–8" },
+        { name: "Seated Row", sets: 3, reps: "6–8" },
+        { name: "Face Pulls", sets: 3, reps: "10–12" },
+        { name: "Biceps Curl", sets: 3, reps: "8–10" },
+      ],
+    },
+    {
+      title: "Full Body Strength",
+      focus: "Total Body",
+      exercises: [
+        { name: "Squat", sets: 4, reps: "4–6" },
+        { name: "Bench Press", sets: 4, reps: "4–6" },
+        { name: "Barbell Row", sets: 4, reps: "4–6" },
+        { name: "Overhead Press", sets: 3, reps: "5–6" },
+        { name: "Romanian Deadlift", sets: 3, reps: "6–8" },
+      ],
+    },
+  ],
+
+  "General Fitness": [
+    {
+      title: "Full Body",
+      focus: "Total Body",
+      exercises: [
+        { name: "Goblet Squat", sets: 3, reps: "10–12" },
+        { name: "Push-Ups", sets: 3, reps: "8–12" },
+        { name: "Seated Row", sets: 3, reps: "10–12" },
+        { name: "Walking Lunges", sets: 3, reps: "10 each leg" },
+        { name: "Plank", sets: 3, reps: "30–45 sec" },
+      ],
+    },
+    {
+      title: "Full Body",
+      focus: "Strength and Conditioning",
+      exercises: [
+        { name: "Leg Press", sets: 3, reps: "10–12" },
+        { name: "Dumbbell Press", sets: 3, reps: "10–12" },
+        { name: "Lat Pulldown", sets: 3, reps: "10–12" },
+        { name: "Step-Ups", sets: 3, reps: "10 each leg" },
+        { name: "Dead Bug", sets: 3, reps: "10 each side" },
+      ],
+    },
+    {
+      title: "Upper Body",
+      focus: "Chest, Back, Arms",
+      exercises: [
+        { name: "Dumbbell Bench Press", sets: 3, reps: "10–12" },
+        { name: "Seated Row", sets: 3, reps: "10–12" },
+        { name: "Shoulder Press", sets: 3, reps: "10–12" },
+        { name: "Biceps Curl", sets: 2, reps: "12–15" },
+        { name: "Triceps Pushdown", sets: 2, reps: "12–15" },
+      ],
+    },
+    {
+      title: "Lower Body",
+      focus: "Legs and Core",
+      exercises: [
+        { name: "Goblet Squat", sets: 3, reps: "10–12" },
+        { name: "Romanian Deadlift", sets: 3, reps: "10–12" },
+        { name: "Walking Lunges", sets: 3, reps: "10 each leg" },
+        { name: "Calf Raises", sets: 3, reps: "12–15" },
+        { name: "Plank", sets: 3, reps: "30–45 sec" },
+      ],
+    },
+    {
+      title: "Conditioning",
+      focus: "Cardio and Full Body",
+      exercises: [
+        { name: "Bodyweight Squat", sets: 3, reps: "15" },
+        { name: "Push-Ups", sets: 3, reps: "10" },
+        { name: "Mountain Climbers", sets: 3, reps: "30 sec" },
+        { name: "Walking Lunges", sets: 3, reps: "12 each leg" },
+        { name: "Plank", sets: 3, reps: "45 sec" },
+      ],
+    },
+  ],
+
+  "Weight Loss": [
+    {
+      title: "Full Body Circuit",
+      focus: "Full Body Conditioning",
+      exercises: [
+        { name: "Goblet Squat", sets: 3, reps: "12–15" },
+        { name: "Push-Ups", sets: 3, reps: "10–15" },
+        { name: "Seated Row", sets: 3, reps: "12–15" },
+        { name: "Walking Lunges", sets: 3, reps: "12 each leg" },
+        { name: "Mountain Climbers", sets: 3, reps: "30 sec" },
+      ],
+    },
+    {
+      title: "Lower Body Circuit",
+      focus: "Legs and Conditioning",
+      exercises: [
+        { name: "Bodyweight Squat", sets: 3, reps: "15" },
+        { name: "Step-Ups", sets: 3, reps: "12 each leg" },
+        { name: "Romanian Deadlift", sets: 3, reps: "12" },
+        { name: "Calf Raises", sets: 3, reps: "15" },
+        { name: "High Knees", sets: 3, reps: "30 sec" },
+      ],
+    },
+    {
+      title: "Upper Body Circuit",
+      focus: "Upper Body Conditioning",
+      exercises: [
+        { name: "Dumbbell Press", sets: 3, reps: "12" },
+        { name: "Lat Pulldown", sets: 3, reps: "12" },
+        { name: "Shoulder Press", sets: 3, reps: "12" },
+        { name: "Biceps Curl", sets: 3, reps: "12–15" },
+        { name: "Triceps Pushdown", sets: 3, reps: "12–15" },
+      ],
+    },
+    {
+      title: "Cardio Strength",
+      focus: "Strength and Conditioning",
+      exercises: [
+        { name: "Goblet Squat", sets: 3, reps: "12" },
+        { name: "Push-Ups", sets: 3, reps: "10–12" },
+        { name: "Walking Lunges", sets: 3, reps: "12 each leg" },
+        { name: "Mountain Climbers", sets: 3, reps: "30 sec" },
+        { name: "Plank", sets: 3, reps: "45 sec" },
+      ],
+    },
+    {
+      title: "Full Body Conditioning",
+      focus: "Total Body",
+      exercises: [
+        { name: "Leg Press", sets: 3, reps: "12–15" },
+        { name: "Dumbbell Press", sets: 3, reps: "12" },
+        { name: "Lat Pulldown", sets: 3, reps: "12" },
+        { name: "Step-Ups", sets: 3, reps: "12 each leg" },
+        { name: "Plank", sets: 3, reps: "45 sec" },
+      ],
+    },
+  ],
+};
+
+function generateWorkout(
+  goal: Goal,
+  experience: Experience,
+  daysPerWeek: DaysPerWeek,
+  duration: Duration
+): WorkoutDay[] {
+  const exerciseLimit = duration === 30 ? 3 : duration === 45 ? 4 : 5;
+
+  const setAdjustment =
+    experience === "Beginner" ? -1 : experience === "Advanced" ? 1 : 0;
+
+  return workoutTemplates[goal]
+    .slice(0, daysPerWeek)
+    .map((day, index) => ({
+      day: index + 1,
+      title: day.title,
+      focus: day.focus,
+      exercises: day.exercises.slice(0, exerciseLimit).map((exercise) => ({
+        ...exercise,
+        sets: Math.max(2, exercise.sets + setAdjustment),
+      })),
+    }));
+}
+
+export default function CorePage() {
+  const [goal, setGoal] = useState<Goal>("Muscle Gain");
+  const [experience, setExperience] = useState<Experience>("Beginner");
+  const [daysPerWeek, setDaysPerWeek] = useState<DaysPerWeek>(3);
+  const [duration, setDuration] = useState<Duration>(45);
+
+  const [generated, setGenerated] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([]);
+  const [loadingSaved, setLoadingSaved] = useState(true);
+
+  const workout = useMemo(
+    () => generateWorkout(goal, experience, daysPerWeek, duration),
+    [goal, experience, daysPerWeek, duration]
+  );
+
+  async function loadSavedWorkouts() {
+    setLoadingSaved(true);
+
+    const { data, error } = await supabase
+      .from("core_outputs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(6);
+
+    if (error) {
+      console.error(error);
+      setLoadingSaved(false);
+      return;
+    }
+
+    setSavedWorkouts((data ?? []) as SavedWorkout[]);
+    setLoadingSaved(false);
+  }
+
+  useEffect(() => {
+    void loadSavedWorkouts();
+  }, []);
+
+  function handleGenerateWorkout() {
+    setGenerated(true);
+    setSaveMessage("");
+  }
+
+  async function handleSaveWorkout() {
+    if (!generated) return;
+
+    setSaving(true);
+    setSaveMessage("");
+
+    const { error } = await supabase.from("core_outputs").insert({
+      fitness_goal: goal,
+      experience_level: experience,
+      days_per_week: daysPerWeek,
+      workout_duration: duration,
+      generated_workout: workout,
+    });
+
+    if (error) {
+      console.error(error);
+      setSaveMessage("There was a problem saving your workout.");
+      setSaving(false);
+      return;
+    }
+
+    setSaveMessage("Workout saved successfully.");
+    setSaving(false);
+
+    await loadSavedWorkouts();
+  }
+
   return (
     <main className="min-h-screen bg-white text-zinc-900">
       {/* NAVBAR */}
       <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+          <Link href="/">
             <Image
               src="/workout-planner-logo.png"
               alt="Workout Planner"
-              width={190}
+              width={180}
               height={70}
               priority
-              className="h-auto w-40 md:w-48"
+              className="h-auto w-36 md:w-44"
             />
           </Link>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-zinc-700 lg:flex">
-            <Link href="/" className="transition hover:text-purple-600">
+          <nav className="hidden items-center gap-8 text-sm text-zinc-700 md:flex">
+            <Link href="/" className="hover:text-purple-600">
               Home
             </Link>
 
-            <Link href="/core" className="transition hover:text-purple-600">
+            <Link
+              href="/core"
+              className="border-b-2 border-purple-600 pb-2 font-semibold"
+            >
               Core
             </Link>
 
-            <a href="#product" className="transition hover:text-purple-600">
+            <Link href="/#product" className="hover:text-purple-600">
               Product
-            </a>
-
-            <a href="#pricing" className="transition hover:text-purple-600">
-              Pricing
-            </a>
-
-            <a href="#marketing" className="transition hover:text-purple-600">
-              Marketing
-            </a>
-
-            <a href="#chat" className="transition hover:text-purple-600">
-              Chat
-            </a>
-
-            <Link href="/docs" className="transition hover:text-purple-600">
-              Docs
             </Link>
 
-            <a href="#demo" className="transition hover:text-purple-600">
-              Demo
-            </a>
+            <Link href="/#roadmap" className="hover:text-purple-600">
+              Roadmap
+            </Link>
 
-            <a
-              href="#dashboard"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-white transition hover:bg-purple-600"
-            >
-              Dashboard
-            </a>
+            <Link href="/docs" className="hover:text-purple-600">
+              Docs
+            </Link>
           </nav>
+
+          <Link
+            href="/"
+            className="rounded-xl border border-zinc-300 px-4 py-2 text-sm font-semibold hover:border-purple-600 hover:text-purple-600"
+          >
+            Back Home
+          </Link>
         </div>
       </header>
 
-      {/* HERO */}
-      <section id="home" className="mx-auto max-w-6xl px-6 py-20">
-        <div className="grid items-center gap-12 md:grid-cols-2">
-          <div>
-            <p className="mb-5 font-bold uppercase tracking-[0.25em] text-purple-600">
-              Workout Planner
-            </p>
+      {/* PAGE */}
+      <section className="mx-auto max-w-7xl px-5 py-10 md:py-14">
+        <div className="mb-8">
+          <p className="font-bold text-purple-600">/core</p>
 
-            <h1 className="text-5xl font-black tracking-tight md:text-7xl">
-              Build a workout that fits your life.
-            </h1>
+          <h1 className="mt-2 text-3xl font-black md:text-5xl">
+            Build a workout that fits your life.
+          </h1>
 
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-zinc-600 md:text-xl">
-              Create and organize workout routines based on your goals,
-              experience level, available time, and weekly schedule.
-            </p>
-
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/core"
-                className="rounded-xl bg-purple-600 px-7 py-3 font-semibold text-white transition hover:bg-purple-700"
-              >
-                Build Your Workout
-              </Link>
-
-              <Link
-                href="/docs"
-                className="rounded-xl border border-zinc-300 px-7 py-3 font-semibold transition hover:border-purple-600 hover:text-purple-600"
-              >
-                Documentation
-              </Link>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-100 shadow-lg">
-            <Image
-              src="/gym-hero.jpg"
-              alt="People training in a gym"
-              width={900}
-              height={700}
-              className="h-full w-full object-cover"
-            />
-          </div>
+          <p className="mt-3 max-w-3xl leading-7 text-zinc-600">
+            Enter your preferences and let Workout Planner create a structured
+            workout plan based on your fitness goal, experience level, weekly
+            schedule, and available time.
+          </p>
         </div>
-      </section>
 
-      {/* QUICK VALUE CARDS */}
-      <section className="border-y border-zinc-200 bg-zinc-50">
-        <div className="mx-auto grid max-w-6xl gap-6 px-6 py-16 md:grid-cols-3">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm">
-            <div className="mb-4 text-3xl">🎯</div>
-
-            <h3 className="text-xl font-bold">Goal Based</h3>
-
-            <p className="mt-3 leading-7 text-zinc-600">
-              Organize your workout plan around goals such as strength, muscle
-              gain, general fitness, or weight management.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm">
-            <div className="mb-4 text-3xl">📅</div>
-
-            <h3 className="text-xl font-bold">Built Around Your Time</h3>
-
-            <p className="mt-3 leading-7 text-zinc-600">
-              Workout Planner is designed for students and busy people who need
-              routines that fit their available days and schedule.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm">
-            <div className="mb-4 text-3xl">🏋️</div>
-
-            <h3 className="text-xl font-bold">Simple and Practical</h3>
-
-            <p className="mt-3 leading-7 text-zinc-600">
-              The goal is to make workout organization simple without
-              overwhelming users with unnecessary complexity.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* CORE */}
-      <section className="mx-auto max-w-6xl px-6 py-24">
-        <div className="grid items-center gap-12 md:grid-cols-2">
-          <div>
-            <p className="font-bold uppercase tracking-[0.2em] text-purple-600">
-              Core
-            </p>
-
-            <h2 className="mt-4 text-4xl font-black md:text-5xl">
-              Workout planning made easier.
+        <div className="grid gap-6 lg:grid-cols-[330px_1fr]">
+          {/* PREFERENCES */}
+          <section className="h-fit rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <h2 className="mb-6 font-bold text-purple-600">
+              1. Your Preferences
             </h2>
 
-            <p className="mt-6 text-lg leading-8 text-zinc-600">
-              Choose your fitness goal, experience level, training days, and
-              workout duration to create a structured routine.
-            </p>
+            <div className="space-y-5">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium">
+                  Fitness Goal
+                </span>
 
-            <p className="mt-4 text-lg leading-8 text-zinc-600">
-              Workout Planner generates a plan with exercises, sets, and
-              repetitions based on your selected preferences.
-            </p>
+                <select
+                  value={goal}
+                  onChange={(event) =>
+                    setGoal(event.target.value as Goal)
+                  }
+                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 outline-none focus:border-purple-600"
+                >
+                  <option>Muscle Gain</option>
+                  <option>Strength</option>
+                  <option>General Fitness</option>
+                  <option>Weight Loss</option>
+                </select>
+              </label>
 
-            <Link
-              href="/core"
-              className="mt-8 inline-flex rounded-xl bg-purple-600 px-6 py-3 font-semibold text-white transition hover:bg-purple-700"
-            >
-              Open Workout Generator
-            </Link>
-          </div>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium">
+                  Experience Level
+                </span>
 
-          <div className="rounded-3xl bg-zinc-950 p-10 text-white">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-purple-400">
-              Core Value
-            </p>
+                <select
+                  value={experience}
+                  onChange={(event) =>
+                    setExperience(event.target.value as Experience)
+                  }
+                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 outline-none focus:border-purple-600"
+                >
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                </select>
+              </label>
 
-            <h3 className="mt-4 text-3xl font-black">
-              Your goals. Your time. Your workout.
-            </h3>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium">
+                  Days per Week
+                </span>
 
-            <p className="mt-5 leading-7 text-zinc-300">
-              A flexible workout planning platform focused on making exercise
-              organization easier for students, young adults, and people with
-              limited time.
-            </p>
-          </div>
-        </div>
-      </section>
+                <select
+                  value={daysPerWeek}
+                  onChange={(event) =>
+                    setDaysPerWeek(
+                      Number(event.target.value) as DaysPerWeek
+                    )
+                  }
+                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 outline-none focus:border-purple-600"
+                >
+                  <option value={2}>2 days</option>
+                  <option value={3}>3 days</option>
+                  <option value={4}>4 days</option>
+                  <option value={5}>5 days</option>
+                </select>
+              </label>
 
-      {/* PRODUCT */}
-      <section id="product" className="bg-zinc-50 py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="text-center">
-            <p className="font-bold uppercase tracking-[0.2em] text-purple-600">
-              Product
-            </p>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium">
+                  Workout Duration
+                </span>
 
-            <h2 className="mt-4 text-4xl font-black md:text-5xl">
-              How Workout Planner works
-            </h2>
+                <select
+                  value={duration}
+                  onChange={(event) =>
+                    setDuration(Number(event.target.value) as Duration)
+                  }
+                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 outline-none focus:border-purple-600"
+                >
+                  <option value={30}>30 minutes</option>
+                  <option value={45}>45 minutes</option>
+                  <option value={60}>60 minutes</option>
+                </select>
+              </label>
 
-            <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-zinc-600">
-              Create a structured workout plan in three simple steps.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-6 md:grid-cols-3">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-8">
-              <span className="text-sm font-black text-purple-600">01</span>
-
-              <div className="mt-5 text-4xl">🎯</div>
-
-              <h3 className="mt-5 text-2xl font-bold">Choose Your Goal</h3>
-
-              <p className="mt-4 leading-7 text-zinc-600">
-                Select Muscle Gain, Strength, General Fitness, or Weight Loss.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-zinc-200 bg-white p-8">
-              <span className="text-sm font-black text-purple-600">02</span>
-
-              <div className="mt-5 text-4xl">📆</div>
-
-              <h3 className="mt-5 text-2xl font-bold">Set Your Schedule</h3>
-
-              <p className="mt-4 leading-7 text-zinc-600">
-                Choose your experience level, training days, and workout
-                duration.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-zinc-200 bg-white p-8">
-              <span className="text-sm font-black text-purple-600">03</span>
-
-              <div className="mt-5 text-4xl">💪</div>
-
-              <h3 className="mt-5 text-2xl font-bold">
-                Generate Your Workout
-              </h3>
-
-              <p className="mt-4 leading-7 text-zinc-600">
-                Get a structured workout with exercises, sets, and repetitions.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-10 text-center">
-            <Link
-              href="/core"
-              className="inline-flex rounded-xl bg-purple-600 px-7 py-3 font-semibold text-white transition hover:bg-purple-700"
-            >
-              Generate a Workout
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* PRICING */}
-      <section id="pricing" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="text-center">
-          <p className="font-bold uppercase tracking-[0.2em] text-purple-600">
-            Pricing
-          </p>
-
-          <h2 className="mt-4 text-4xl font-black">
-            Early development preview
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-zinc-600">
-            Workout Planner is currently under development. Final pricing has
-            not been defined.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-md rounded-3xl border-2 border-purple-600 p-9 shadow-sm">
-          <p className="font-bold text-purple-600">Development Preview</p>
-
-          <h3 className="mt-4 text-4xl font-black">Free</h3>
-
-          <p className="mt-4 text-zinc-600">
-            Access to the current public project preview.
-          </p>
-
-          <div className="mt-7 space-y-3 text-zinc-700">
-            <p>✓ Public homepage</p>
-            <p>✓ Workout generator</p>
-            <p>✓ Saved workout preview</p>
-            <p>✓ Project roadmap</p>
-            <p>✓ Documentation preview</p>
-          </div>
-        </div>
-      </section>
-
-      {/* MARKETING */}
-      <section id="marketing" className="bg-zinc-950 py-24 text-white">
-        <div className="mx-auto max-w-6xl px-6">
-          <p className="font-bold uppercase tracking-[0.2em] text-purple-400">
-            Marketing
-          </p>
-
-          <h2 className="mt-4 max-w-3xl text-4xl font-black md:text-5xl">
-            Designed for people who want to exercise but need more structure.
-          </h2>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7">
-              <h3 className="text-xl font-bold">Students</h3>
-
-              <p className="mt-3 text-zinc-400">
-                Workout planning that can fit around classes and study time.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7">
-              <h3 className="text-xl font-bold">Young Adults</h3>
-
-              <p className="mt-3 text-zinc-400">
-                A simple way to organize training without complicated planning
-                tools.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7">
-              <h3 className="text-xl font-bold">Busy People</h3>
-
-              <p className="mt-3 text-zinc-400">
-                Build exercise into a limited weekly schedule.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CHAT */}
-      <section id="chat" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="rounded-3xl bg-purple-50 p-10 text-center md:p-16">
-          <p className="font-bold uppercase tracking-[0.2em] text-purple-600">
-            Chat
-          </p>
-
-          <h2 className="mt-4 text-4xl font-black">
-            Workout assistance is planned for the future.
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-zinc-600">
-            A future version may include interactive assistance for workout
-            organization. This feature is not part of the current version.
-          </p>
-
-          <span className="mt-8 inline-block rounded-full bg-white px-6 py-3 font-semibold text-purple-600 shadow-sm">
-            Coming Later
-          </span>
-        </div>
-      </section>
-
-      {/* DEMO */}
-      <section id="demo" className="bg-zinc-50 py-24">
-        <div className="mx-auto max-w-6xl px-6 text-center">
-          <p className="font-bold uppercase tracking-[0.2em] text-purple-600">
-            Demo
-          </p>
-
-          <h2 className="mt-4 text-4xl font-black">
-            Workout Planner Preview
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-zinc-600">
-            This live website is the current public preview of the Workout
-            Planner project.
-          </p>
-
-          <div className="mx-auto mt-12 max-w-3xl rounded-3xl border border-zinc-200 bg-white p-10 shadow-sm">
-            <Image
-              src="/workout-planner-logo.png"
-              alt="Workout Planner Logo"
-              width={400}
-              height={180}
-              className="mx-auto h-auto"
-            />
-
-            <p className="mt-8 text-xl font-semibold">
-              The current version includes the homepage, documentation, workout
-              generator, and Supabase workout saving.
-            </p>
-
-            <Link
-              href="/core"
-              className="mt-8 inline-flex rounded-xl bg-purple-600 px-7 py-3 font-semibold text-white transition hover:bg-purple-700"
-            >
-              Try Workout Planner
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* DASHBOARD */}
-      <section id="dashboard" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="rounded-3xl border border-zinc-200 p-10 text-center md:p-16">
-          <p className="font-bold uppercase tracking-[0.2em] text-purple-600">
-            Dashboard
-          </p>
-
-          <h2 className="mt-4 text-4xl font-black">
-            Dashboard Coming Soon
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-zinc-600">
-            User accounts and advanced progress tracking are planned for future
-            versions of Workout Planner.
-          </p>
-        </div>
-      </section>
-
-      {/* ROADMAP */}
-      <section id="roadmap" className="bg-zinc-950 py-24 text-white">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="text-center">
-            <p className="font-bold uppercase tracking-[0.2em] text-purple-400">
-              Roadmap
-            </p>
-
-            <h2 className="mt-4 text-4xl font-black">Project Roadmap</h2>
-          </div>
-
-          <div className="mt-14 grid gap-5 md:grid-cols-3 lg:grid-cols-6">
-            {[
-              ["01", "Infrastructure"],
-              ["02", "Workout Input"],
-              ["03", "Routine Generator"],
-              ["04", "Saved Workouts"],
-              ["05", "Progress Tracking"],
-              ["06", "Final Product"],
-            ].map(([number, title]) => (
-              <div
-                key={number}
-                className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-center"
+              <button
+                type="button"
+                onClick={handleGenerateWorkout}
+                className="w-full rounded-xl bg-gradient-to-r from-purple-700 to-purple-500 px-5 py-3 font-bold text-white shadow-sm transition hover:brightness-110"
               >
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 font-black">
-                  {number}
-                </div>
+                Generate Workout
+              </button>
 
-                <p className="mt-5 font-bold">{title}</p>
+              <p className="text-center text-xs text-zinc-500">
+                It only takes a few seconds.
+              </p>
+            </div>
+          </section>
+
+          {/* GENERATED WORKOUT */}
+          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <div className="flex flex-col gap-3 border-b border-zinc-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="font-bold text-purple-600">
+                  2. Your Generated Workout
+                </h2>
+
+                <p className="mt-1 text-sm text-zinc-500">
+                  {goal} · {experience} · {daysPerWeek} days per week
+                </p>
               </div>
-            ))}
-          </div>
+
+              <span className="w-fit rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700">
+                {daysPerWeek} days · {duration} min
+              </span>
+            </div>
+
+            {!generated ? (
+              <div className="flex min-h-[450px] items-center justify-center text-center">
+                <div>
+                  <div className="text-6xl">🏋️</div>
+
+                  <h3 className="mt-5 text-xl font-bold">
+                    Your workout will appear here
+                  </h3>
+
+                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500">
+                    Choose your preferences and press Generate Workout.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 space-y-5">
+                {workout.map((day) => (
+                  <article
+                    key={day.day}
+                    className="rounded-xl border border-zinc-200 bg-zinc-50 p-4"
+                  >
+                    <h3 className="font-bold text-purple-700">
+                      Day {day.day} — {day.title}
+                    </h3>
+
+                    <p className="mt-1 text-xs text-zinc-500">
+                      {day.focus}
+                    </p>
+
+                    <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200 bg-white">
+                      <div className="grid grid-cols-[1fr_65px_90px] bg-zinc-100 px-3 py-2 text-xs font-bold text-zinc-600">
+                        <span>Exercise</span>
+                        <span className="text-center">Sets</span>
+                        <span className="text-center">Reps</span>
+                      </div>
+
+                      {day.exercises.map((exercise) => (
+                        <div
+                          key={exercise.name}
+                          className="grid grid-cols-[1fr_65px_90px] border-t border-zinc-200 px-3 py-3 text-sm"
+                        >
+                          <span>{exercise.name}</span>
+                          <span className="text-center">
+                            {exercise.sets}
+                          </span>
+                          <span className="text-center">
+                            {exercise.reps}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={handleSaveWorkout}
+                  disabled={saving}
+                  className="w-full rounded-xl bg-purple-600 px-5 py-3 font-bold text-white transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {saving ? "Saving..." : "Save Workout"}
+                </button>
+
+                {saveMessage && (
+                  <p
+                    className={`text-center text-sm font-semibold ${
+                      saveMessage === "Workout saved successfully."
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {saveMessage}
+                  </p>
+                )}
+              </div>
+            )}
+          </section>
         </div>
+
+        {/* SAVED WORKOUTS */}
+        <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+          <h2 className="font-bold text-purple-600">
+            3. Saved Workouts
+          </h2>
+
+          <p className="mt-1 text-sm text-zinc-500">
+            Recent workouts saved to Supabase.
+          </p>
+
+          <div className="mt-5">
+            {loadingSaved ? (
+              <div className="rounded-xl border border-dashed border-zinc-300 p-8 text-center text-zinc-500">
+                Loading saved workouts...
+              </div>
+            ) : savedWorkouts.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-zinc-300 p-8 text-center text-zinc-500">
+                No saved workouts yet.
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {savedWorkouts.map((savedWorkout) => (
+                  <article
+                    key={savedWorkout.id}
+                    className="rounded-xl border border-zinc-200 bg-zinc-50 p-5"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-bold">
+                          {savedWorkout.fitness_goal}
+                        </h3>
+
+                        <p className="mt-1 text-sm text-zinc-500">
+                          {savedWorkout.experience_level}
+                        </p>
+                      </div>
+
+                      <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700">
+                        {savedWorkout.days_per_week} days
+                      </span>
+                    </div>
+
+                    <div className="mt-4 space-y-2 text-sm text-zinc-600">
+                      <p>
+                        Duration: {savedWorkout.workout_duration} minutes
+                      </p>
+
+                      <p>
+                        Training days:{" "}
+                        {savedWorkout.generated_workout?.length ?? 0}
+                      </p>
+
+                      <p className="text-xs text-zinc-400">
+                        Saved{" "}
+                        {new Date(
+                          savedWorkout.created_at
+                        ).toLocaleString("en-US")}
+                      </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </section>
-
-      {/* FOOTER */}
-      <footer className="bg-black px-6 py-12 text-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 md:flex-row">
-          <div>
-            <Image
-              src="/workout-planner-logo.png"
-              alt="Workout Planner"
-              width={190}
-              height={70}
-              className="h-auto w-40 brightness-0 invert"
-            />
-
-            <p className="mt-4 text-sm text-zinc-500">
-              Build a workout that fits your life.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-zinc-400">
-            <Link href="/" className="hover:text-white">
-              Home
-            </Link>
-
-            <Link href="/core" className="hover:text-white">
-              Core
-            </Link>
-
-            <a href="#product" className="hover:text-white">
-              Product
-            </a>
-
-            <Link href="/docs" className="hover:text-white">
-              Docs
-            </Link>
-          </div>
-
-          <p className="text-sm text-zinc-500">© 2026 Workout Planner.</p>
-        </div>
-      </footer>
     </main>
   );
 }
