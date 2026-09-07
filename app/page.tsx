@@ -19,13 +19,13 @@ export default function Home() {
           </Link>
 
           <nav className="hidden items-center gap-7 text-sm font-medium text-zinc-700 lg:flex">
-            <a href="#home" className="transition hover:text-purple-600">
+            <Link href="/" className="transition hover:text-purple-600">
               Home
-            </a>
+            </Link>
 
-            <a href="#core" className="transition hover:text-purple-600">
+            <Link href="/core" className="transition hover:text-purple-600">
               Core
-            </a>
+            </Link>
 
             <a href="#product" className="transition hover:text-purple-600">
               Product
@@ -79,12 +79,12 @@ export default function Home() {
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <a
-                href="#product"
+              <Link
+                href="/core"
                 className="rounded-xl bg-purple-600 px-7 py-3 font-semibold text-white transition hover:bg-purple-700"
               >
-                Explore the Product
-              </a>
+                Build Your Workout
+              </Link>
 
               <Link
                 href="/docs"
@@ -116,8 +116,8 @@ export default function Home() {
             <h3 className="text-xl font-bold">Goal Based</h3>
 
             <p className="mt-3 leading-7 text-zinc-600">
-              Organize your workout plan around goals such as strength,
-              muscle gain, general fitness, or weight management.
+              Organize your workout plan around goals such as strength, muscle
+              gain, general fitness, or weight management.
             </p>
           </div>
 
@@ -127,8 +127,8 @@ export default function Home() {
             <h3 className="text-xl font-bold">Built Around Your Time</h3>
 
             <p className="mt-3 leading-7 text-zinc-600">
-              Workout Planner is designed for students and busy people who
-              need routines that fit their available days and schedule.
+              Workout Planner is designed for students and busy people who need
+              routines that fit their available days and schedule.
             </p>
           </div>
 
@@ -146,7 +146,7 @@ export default function Home() {
       </section>
 
       {/* CORE */}
-      <section id="core" className="mx-auto max-w-6xl px-6 py-24">
+      <section className="mx-auto max-w-6xl px-6 py-24">
         <div className="grid items-center gap-12 md:grid-cols-2">
           <div>
             <p className="font-bold uppercase tracking-[0.2em] text-purple-600">
@@ -158,15 +158,21 @@ export default function Home() {
             </h2>
 
             <p className="mt-6 text-lg leading-8 text-zinc-600">
-              Many people want to exercise consistently but struggle to know
-              what exercises to perform, how often to train, and how to
-              organize workouts throughout the week.
+              Choose your fitness goal, experience level, training days, and
+              workout duration to create a structured routine.
             </p>
 
             <p className="mt-4 text-lg leading-8 text-zinc-600">
-              Workout Planner is being designed to solve that problem with a
-              simple and organized workout planning experience.
+              Workout Planner generates a plan with exercises, sets, and
+              repetitions based on your selected preferences.
             </p>
+
+            <Link
+              href="/core"
+              className="mt-8 inline-flex rounded-xl bg-purple-600 px-6 py-3 font-semibold text-white transition hover:bg-purple-700"
+            >
+              Open Workout Generator
+            </Link>
           </div>
 
           <div className="rounded-3xl bg-zinc-950 p-10 text-white">
@@ -196,11 +202,11 @@ export default function Home() {
             </p>
 
             <h2 className="mt-4 text-4xl font-black md:text-5xl">
-              How Workout Planner will work
+              How Workout Planner works
             </h2>
 
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-zinc-600">
-              The first product experience focuses on three simple steps.
+              Create a structured workout plan in three simple steps.
             </p>
           </div>
 
@@ -213,8 +219,7 @@ export default function Home() {
               <h3 className="mt-5 text-2xl font-bold">Choose Your Goal</h3>
 
               <p className="mt-4 leading-7 text-zinc-600">
-                Select the main goal that will guide your future workout
-                routine.
+                Select Muscle Gain, Strength, General Fitness, or Weight Loss.
               </p>
             </div>
 
@@ -226,8 +231,8 @@ export default function Home() {
               <h3 className="mt-5 text-2xl font-bold">Set Your Schedule</h3>
 
               <p className="mt-4 leading-7 text-zinc-600">
-                Choose how many days per week you can train and how much time
-                you have available.
+                Choose your experience level, training days, and workout
+                duration.
               </p>
             </div>
 
@@ -236,13 +241,23 @@ export default function Home() {
 
               <div className="mt-5 text-4xl">💪</div>
 
-              <h3 className="mt-5 text-2xl font-bold">Build Your Workout</h3>
+              <h3 className="mt-5 text-2xl font-bold">
+                Generate Your Workout
+              </h3>
 
               <p className="mt-4 leading-7 text-zinc-600">
-                Future versions will use the information provided by the user
-                to help organize a personalized workout routine.
+                Get a structured workout with exercises, sets, and repetitions.
               </p>
             </div>
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link
+              href="/core"
+              className="inline-flex rounded-xl bg-purple-600 px-7 py-3 font-semibold text-white transition hover:bg-purple-700"
+            >
+              Generate a Workout
+            </Link>
           </div>
         </div>
       </section>
@@ -275,7 +290,8 @@ export default function Home() {
 
           <div className="mt-7 space-y-3 text-zinc-700">
             <p>✓ Public homepage</p>
-            <p>✓ Product concept</p>
+            <p>✓ Workout generator</p>
+            <p>✓ Saved workout preview</p>
             <p>✓ Project roadmap</p>
             <p>✓ Documentation preview</p>
           </div>
@@ -296,6 +312,7 @@ export default function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7">
               <h3 className="text-xl font-bold">Students</h3>
+
               <p className="mt-3 text-zinc-400">
                 Workout planning that can fit around classes and study time.
               </p>
@@ -303,14 +320,16 @@ export default function Home() {
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7">
               <h3 className="text-xl font-bold">Young Adults</h3>
+
               <p className="mt-3 text-zinc-400">
-                A simple way to organize training without needing complicated
-                planning tools.
+                A simple way to organize training without complicated planning
+                tools.
               </p>
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7">
               <h3 className="text-xl font-bold">Busy People</h3>
+
               <p className="mt-3 text-zinc-400">
                 Build exercise into a limited weekly schedule.
               </p>
@@ -353,7 +372,7 @@ export default function Home() {
           </h2>
 
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-zinc-600">
-            This live website is the first public preview of the Workout
+            This live website is the current public preview of the Workout
             Planner project.
           </p>
 
@@ -367,9 +386,16 @@ export default function Home() {
             />
 
             <p className="mt-8 text-xl font-semibold">
-              More product functionality will be added in future development
-              phases.
+              The current version includes the homepage, documentation, workout
+              generator, and Supabase workout saving.
             </p>
+
+            <Link
+              href="/core"
+              className="mt-8 inline-flex rounded-xl bg-purple-600 px-7 py-3 font-semibold text-white transition hover:bg-purple-700"
+            >
+              Try Workout Planner
+            </Link>
           </div>
         </div>
       </section>
@@ -381,17 +407,19 @@ export default function Home() {
             Dashboard
           </p>
 
-          <h2 className="mt-4 text-4xl font-black">Dashboard Coming Soon</h2>
+          <h2 className="mt-4 text-4xl font-black">
+            Dashboard Coming Soon
+          </h2>
 
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-zinc-600">
-            User accounts, saved workouts, workout preferences, and progress
-            tracking are planned for future versions of Workout Planner.
+            User accounts and advanced progress tracking are planned for future
+            versions of Workout Planner.
           </p>
         </div>
       </section>
 
       {/* ROADMAP */}
-      <section className="bg-zinc-950 py-24 text-white">
+      <section id="roadmap" className="bg-zinc-950 py-24 text-white">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <p className="font-bold uppercase tracking-[0.2em] text-purple-400">
@@ -443,23 +471,24 @@ export default function Home() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-6 text-sm text-zinc-400">
-            <a href="#home" className="hover:text-white">
+            <Link href="/" className="hover:text-white">
               Home
-            </a>
-            <a href="#core" className="hover:text-white">
+            </Link>
+
+            <Link href="/core" className="hover:text-white">
               Core
-            </a>
+            </Link>
+
             <a href="#product" className="hover:text-white">
               Product
             </a>
+
             <Link href="/docs" className="hover:text-white">
               Docs
             </Link>
           </div>
 
-          <p className="text-sm text-zinc-500">
-            ©️ 2026 Workout Planner.
-          </p>
+          <p className="text-sm text-zinc-500">© 2026 Workout Planner.</p>
         </div>
       </footer>
     </main>
