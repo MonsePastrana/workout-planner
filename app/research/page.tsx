@@ -5,6 +5,81 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+const globalExamples = [
+  {
+    name: "Nike Training Club",
+    category: "Guided Fitness",
+    market: "Global",
+    model: "Free",
+    keyFeature: "Guided workout plans and a large exercise library",
+    takeaway:
+      "Users value flexible workouts that can fit different schedules and training environments.",
+  },
+  {
+    name: "Fitbod",
+    category: "Workout Planner",
+    market: "Global",
+    model: "Subscription",
+    keyFeature: "Personalized workouts based on goals, equipment, and progress",
+    takeaway:
+      "Personalization can make workout planning easier for users who do not know what routine to follow.",
+  },
+  {
+    name: "Freeletics",
+    category: "Digital Coach",
+    market: "Global",
+    model: "Freemium",
+    keyFeature: "Adaptive training plans based on performance and feedback",
+    takeaway:
+      "Adaptive plans can keep workouts relevant as the user's progress changes.",
+  },
+  {
+    name: "JEFIT",
+    category: "Workout Planner",
+    market: "Global",
+    model: "Freemium",
+    keyFeature: "Custom routines, workout templates, and progress tracking",
+    takeaway:
+      "Planning and progress tracking are important features for structured training.",
+  },
+  {
+    name: "Hevy",
+    category: "Workout Tracker",
+    market: "Global",
+    model: "Freemium",
+    keyFeature: "Routine creation, workout logging, and progress tracking",
+    takeaway:
+      "A simple interface can help users plan workouts without making the process complicated.",
+  },
+];
+
+const mexicoInsights = [
+  {
+    title: "Smart Fit App",
+    label: "Local Benchmark",
+    description:
+      "Smart Fit provides members with workout routines, exercise videos, sets, repetitions, and on-demand training through its app.",
+    opportunity:
+      "Workout Planner can differentiate itself by offering planning without requiring a gym membership.",
+  },
+  {
+    title: "Fitpass Mexico",
+    label: "Local Substitute",
+    description:
+      "Fitpass allows users in Mexico to discover and reserve fitness classes and gyms through a mobile platform.",
+    opportunity:
+      "Workout Planner can focus on users who prefer independent workouts instead of paid studio reservations.",
+  },
+  {
+    title: "Student Accessibility",
+    label: "Opportunity",
+    description:
+      "Several fitness alternatives depend on subscriptions, memberships, or access to physical facilities.",
+    opportunity:
+      "A simple and accessible workout planner can provide a lower-friction option for students and young adults.",
+  },
+];
+
 const competitors = [
   {
     id: 1,
@@ -131,10 +206,13 @@ export default function ResearchPage() {
   );
 
   const [hasRunResearch, setHasRunResearch] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("All Types");
 
   const [savedResearch, setSavedResearch] = useState<SavedResearch[]>([]);
+  const [savedResearchCount, setSavedResearchCount] = useState(0);
+
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
@@ -148,9 +226,9 @@ export default function ResearchPage() {
   }
 
   async function loadSavedResearch() {
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from("research_outputs")
-      .select("*")
+      .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
       .limit(5);
 
@@ -162,6 +240,8 @@ export default function ResearchPage() {
     if (data) {
       setSavedResearch(data as SavedResearch[]);
     }
+
+    setSavedResearchCount(count ?? 0);
   }
 
   async function saveResearch() {
@@ -173,7 +253,7 @@ export default function ResearchPage() {
       target_user: targetUser,
       country: country,
       keywords: keywords,
-      global_examples_count: 5,
+      global_examples_count: globalExamples.length,
       competitor_count: competitors.length,
     });
 
@@ -285,7 +365,7 @@ export default function ResearchPage() {
           </p>
         </div>
 
-        {/* Intake + Output */}
+        {/* Research Intake + Output */}
         <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
           {/* Research Intake */}
           <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
@@ -401,8 +481,8 @@ export default function ResearchPage() {
             ) : (
               <div>
                 <div className="mb-4 rounded-xl bg-purple-50 px-4 py-3 text-sm text-purple-700">
-                  Prototype research output based on the selected Week 2
-                  research scope.
+                  Research output based on the selected Week 2 benchmarking
+                  scope.
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
@@ -414,8 +494,8 @@ export default function ResearchPage() {
                     <h3 className="font-bold">5 Global Examples</h3>
 
                     <p className="mt-2 text-sm text-zinc-500">
-                      Review popular fitness solutions from global markets and
-                      identify useful patterns.
+                      Five fitness and workout-planning products were analyzed
+                      for useful patterns and product ideas.
                     </p>
                   </article>
 
@@ -427,8 +507,8 @@ export default function ResearchPage() {
                     <h3 className="font-bold">Mexico Localization</h3>
 
                     <p className="mt-2 text-sm text-zinc-500">
-                      Compare local fitness needs, market context, and
-                      opportunities for Mexican users.
+                      Local fitness alternatives and opportunities were
+                      considered for the Mexican market.
                     </p>
                   </article>
 
@@ -442,8 +522,8 @@ export default function ResearchPage() {
                     </h3>
 
                     <p className="mt-2 text-sm text-zinc-500">
-                      Use feedback from a real person to validate assumptions
-                      and compare them with the research findings.
+                      A real user conversation will be used to compare human
+                      feedback with the research findings.
                     </p>
                   </article>
                 </div>
@@ -477,13 +557,125 @@ export default function ResearchPage() {
           </section>
         </div>
 
+        {/* Global Examples */}
+        {hasRunResearch && (
+          <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-purple-600">
+                3. Global Examples
+              </h2>
+
+              <p className="mt-1 text-sm text-zinc-500">
+                Five global fitness products were reviewed to understand common
+                features, business models, and useful product patterns.
+              </p>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              {globalExamples.map((example, index) => (
+                <article
+                  key={example.name}
+                  className="rounded-2xl border border-zinc-200 p-5"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100 font-bold text-purple-700">
+                        {index + 1}
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-bold">{example.name}</h3>
+
+                        <p className="text-sm text-zinc-500">
+                          {example.category}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold">
+                      {example.model}
+                    </span>
+                  </div>
+
+                  <div className="mt-5 space-y-3 text-sm">
+                    <div>
+                      <p className="font-semibold text-zinc-900">
+                        Key Feature
+                      </p>
+
+                      <p className="mt-1 text-zinc-600">
+                        {example.keyFeature}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-semibold text-zinc-900">
+                        Benchmark Takeaway
+                      </p>
+
+                      <p className="mt-1 text-zinc-600">
+                        {example.takeaway}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Mexico Localization */}
+        {hasRunResearch && (
+          <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-purple-600">
+                4. Mexico Localization
+              </h2>
+
+              <p className="mt-1 text-sm text-zinc-500">
+                Local examples and opportunities that help adapt Workout
+                Planner to the Mexican student and young-adult market.
+              </p>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-3">
+              {mexicoInsights.map((insight) => (
+                <article
+                  key={insight.title}
+                  className="rounded-2xl border border-zinc-200 p-5"
+                >
+                  <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                    {insight.label}
+                  </span>
+
+                  <h3 className="mt-4 text-lg font-bold">{insight.title}</h3>
+
+                  <p className="mt-2 text-sm leading-6 text-zinc-600">
+                    {insight.description}
+                  </p>
+
+                  <div className="mt-5 rounded-xl bg-zinc-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-purple-600">
+                      Opportunity for Workout Planner
+                    </p>
+
+                    <p className="mt-2 text-sm text-zinc-600">
+                      {insight.opportunity}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Competitor Table */}
         {hasRunResearch && (
           <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <h2 className="text-xl font-bold text-purple-600">
-                  3. Competitor & Substitute Table
+                  5. Competitor & Substitute Table
                 </h2>
 
                 <p className="mt-1 text-sm text-zinc-500">
@@ -556,6 +748,12 @@ export default function ResearchPage() {
                   ))}
                 </tbody>
               </table>
+
+              {filteredCompetitors.length === 0 && (
+                <div className="py-10 text-center text-zinc-500">
+                  No competitors match your search.
+                </div>
+              )}
             </div>
 
             <p className="mt-4 text-sm text-zinc-500">
@@ -569,7 +767,7 @@ export default function ResearchPage() {
         {hasRunResearch && (
           <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold text-purple-600">
-              4. Benchmark Cards
+              6. Benchmark Cards
             </h2>
 
             <p className="mt-1 text-sm text-zinc-500">
@@ -586,7 +784,10 @@ export default function ResearchPage() {
                   <div className="flex justify-between gap-3">
                     <div>
                       <h3 className="font-bold">{benchmark.name}</h3>
-                      <p className="text-sm text-zinc-500">{benchmark.type}</p>
+
+                      <p className="text-sm text-zinc-500">
+                        {benchmark.type}
+                      </p>
                     </div>
 
                     <span className="h-fit rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
@@ -612,6 +813,7 @@ export default function ResearchPage() {
 
                     <div className="flex justify-between pt-3 font-bold">
                       <span>Overall</span>
+
                       <span className="text-purple-600">
                         {benchmark.overall}
                       </span>
@@ -626,7 +828,9 @@ export default function ResearchPage() {
         {/* Risk Map */}
         {hasRunResearch && (
           <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-purple-600">5. Risk Map</h2>
+            <h2 className="text-xl font-bold text-purple-600">
+              7. Risk Map
+            </h2>
 
             <p className="mt-1 text-sm text-zinc-500">
               Key risks that could affect Workout Planner based on the
@@ -686,6 +890,15 @@ export default function ResearchPage() {
                 </p>
               </div>
             </div>
+
+            <div className="mt-5 rounded-xl bg-zinc-50 p-4 text-sm text-zinc-600">
+              <span className="font-semibold text-zinc-900">
+                Main Takeaway:
+              </span>{" "}
+              Workout Planner should remain simple, accessible, and focused on
+              practical personalization to compete with free alternatives and
+              larger fitness platforms.
+            </div>
           </section>
         )}
 
@@ -714,7 +927,9 @@ export default function ResearchPage() {
             </div>
 
             {saveMessage && (
-              <p className="mt-4 font-medium text-purple-700">{saveMessage}</p>
+              <p className="mt-4 font-medium text-purple-700">
+                {saveMessage}
+              </p>
             )}
           </section>
         )}
@@ -722,7 +937,7 @@ export default function ResearchPage() {
         {/* Saved Research */}
         <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-bold text-purple-600">
-            6. Saved Research
+            8. Saved Research
           </h2>
 
           <p className="mt-1 text-sm text-zinc-500">
@@ -746,7 +961,9 @@ export default function ResearchPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-bold">{research.problem_area}</h3>
+                      <h3 className="font-bold">
+                        {research.problem_area}
+                      </h3>
 
                       <p className="mt-1 text-sm text-zinc-500">
                         {research.target_user}
@@ -779,6 +996,67 @@ export default function ResearchPage() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* Dashboard Widget */}
+        <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-purple-600">
+              9. Dashboard Widget
+            </h2>
+
+            <p className="mt-1 text-sm text-zinc-500">
+              Quick overview of the current Week 2 research activity.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <article className="rounded-2xl border border-zinc-200 p-5">
+              <div className="mb-4 text-2xl">📄</div>
+
+              <p className="text-3xl font-bold text-purple-600">
+                {savedResearchCount}
+              </p>
+
+              <p className="mt-1 text-sm text-zinc-500">
+                Saved Research
+              </p>
+            </article>
+
+            <article className="rounded-2xl border border-zinc-200 p-5">
+              <div className="mb-4 text-2xl">🌎</div>
+
+              <p className="text-3xl font-bold text-purple-600">
+                {globalExamples.length}
+              </p>
+
+              <p className="mt-1 text-sm text-zinc-500">
+                Global Examples
+              </p>
+            </article>
+
+            <article className="rounded-2xl border border-zinc-200 p-5">
+              <div className="mb-4 text-2xl">📊</div>
+
+              <p className="text-3xl font-bold text-purple-600">
+                {competitors.length}
+              </p>
+
+              <p className="mt-1 text-sm text-zinc-500">
+                Competitors & Substitutes
+              </p>
+            </article>
+
+            <article className="rounded-2xl border border-zinc-200 p-5">
+              <div className="mb-4 text-2xl">💬</div>
+
+              <p className="text-3xl font-bold text-purple-600">1</p>
+
+              <p className="mt-1 text-sm text-zinc-500">
+                Human Validation Required
+              </p>
+            </article>
+          </div>
         </section>
       </div>
     </main>
