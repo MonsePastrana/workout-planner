@@ -23,9 +23,16 @@ export default function Home() {
               Home
             </a>
 
-            <a href="/core" className="transition hover:text-purple-600">
+            <a href="#core" className="transition hover:text-purple-600">
               Core
             </a>
+
+            <Link
+              href="/research"
+              className="transition hover:text-purple-600"
+            >
+              Research
+            </Link>
 
             <a href="#product" className="transition hover:text-purple-600">
               Product
@@ -446,12 +453,19 @@ export default function Home() {
             <a href="#home" className="hover:text-white">
               Home
             </a>
-            <a href="/core" className="hover:text-white">
+
+            <a href="#core" className="hover:text-white">
               Core
             </a>
+
+            <Link href="/research" className="hover:text-white">
+              Research
+            </Link>
+
             <a href="#product" className="hover:text-white">
               Product
             </a>
+
             <Link href="/docs" className="hover:text-white">
               Docs
             </Link>
