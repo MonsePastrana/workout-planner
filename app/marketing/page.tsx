@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import CampaignTools from "./campaign-tools";
 import {
   audiences,
   filterAssets,
@@ -511,11 +512,13 @@ export default function MarketingPage() {
         )}
       </section>
 
+      <CampaignTools onExport={downloadText} />
+
       <footer className="bg-purple-950 px-6 py-8 text-center text-sm leading-7 text-purple-100">
         <p>Workout Planner | Week 4</p>
         <p>
-          Campaign calendar, A/B comparison, and database saving
-          are not implemented in this step.
+          Prepared content and manual A/B comparison. Database saving is
+          not implemented yet.
         </p>
       </footer>
     </main>
