@@ -7,6 +7,7 @@ const navigation = [
   { label: "Product", href: "/product" },
   { label: "Pricing", href: "/pricing" },
   { label: "Marketing", href: "/marketing" },
+  { label: "Assistant", href: "/chat" },
   { label: "Docs", href: "/docs" },
 ];
 
@@ -71,6 +72,11 @@ const modules = [
       "Explore the marketing dashboard prototype. Tools are in development.",
   },
   {
+    title: "Guided Assistant",
+    href: "/chat",
+    description: "Answer three questions, review guided advice, and rate your experience.",
+  },
+  {
     title: "Project Documentation",
     href: "/docs",
     description: "Read about the project and its development process.",
@@ -84,7 +90,8 @@ const roadmap = [
   "Saved Workouts",
   "Research & Benchmarking",
   "Product Architecture & Pricing",
-  "Marketing & Content - in development",
+  "Marketing & Content",
+  "Guided Assistant & Feedback",
 ];
 
 const questions = [
