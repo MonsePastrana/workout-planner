@@ -55,6 +55,7 @@ const guardrailPatterns = [
       "injured",
       "pain",
       "hurt",
+      "hurts",
       "doctor",
       "medical",
       "diagnosis",
@@ -95,6 +96,14 @@ const guardrailPatterns = [
   },
 ];
 
+
+function containsWholePhrase(text: string, phrase: string): boolean {
+  const normalize = (value: string) =>
+    " " + value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() + " ";
+
+  return normalize(text).includes(normalize(phrase));
+}
+
 export function answerQuestion(
   question: string,
   intake: Intake
@@ -111,7 +120,7 @@ export function answerQuestion(
   }
 
   for (const rule of guardrailPatterns) {
-    if (rule.keywords.some((keyword) => text.includes(keyword))) {
+    if (rule.keywords.some((keyword) => containsWholePhrase(text, keyword))) {
       return {
         category: "guardrail",
         title: rule.title,

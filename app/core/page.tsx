@@ -321,7 +321,6 @@ export default function CorePage() {
   }
 
   async function loadSavedWorkouts() {
-    setLoadingSaved(true);
 
     const { data, error } = await supabase
       .from("core_outputs")
@@ -365,11 +364,41 @@ export default function CorePage() {
 
     setSaveMessage("Workout saved successfully.");
     setSaving(false);
+    setLoadingSaved(true);
     await loadSavedWorkouts();
   }
 
   useEffect(() => {
-    loadSavedWorkouts();
+    let active = true;
+
+    void Promise.resolve(
+      supabase
+        .from("core_outputs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(5)
+    ).then(
+      ({ data, error }) => {
+        if (!active) return;
+
+        if (error) {
+          console.error("Error loading saved workouts:", error);
+        } else {
+          setSavedWorkouts((data ?? []) as SavedWorkout[]);
+        }
+
+        setLoadingSaved(false);
+      },
+      (error: unknown) => {
+        if (!active) return;
+        console.error("Error loading saved workouts:", error);
+        setLoadingSaved(false);
+      }
+    );
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (

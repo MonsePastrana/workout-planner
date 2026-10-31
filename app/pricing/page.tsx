@@ -109,7 +109,6 @@ export default function PricingPage() {
       : 0;
 
   const loadSavedScenarios = useCallback(async () => {
-    setLoadingScenarios(true);
 
     const { data, error } = await supabase
       .from("pricing_scenarios")
@@ -139,8 +138,39 @@ export default function PricingPage() {
   }, []);
 
   useEffect(() => {
-    loadSavedScenarios();
-  }, [loadSavedScenarios]);
+    let active = true;
+
+    void Promise.resolve(
+      supabase
+        .from("pricing_scenarios")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(6)
+    ).then(
+      ({ data, error }) => {
+        if (!active) return;
+
+        if (error) {
+          console.error(error);
+          setError("Saved scenarios could not be loaded.");
+        } else {
+          setSavedScenarios((data ?? []) as SavedScenario[]);
+        }
+
+        setLoadingScenarios(false);
+      },
+      (error: unknown) => {
+        if (!active) return;
+        console.error(error);
+        setError("Saved scenarios could not be loaded.");
+        setLoadingScenarios(false);
+      }
+    );
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function applyScenario(type: ScenarioType) {
     const values =
@@ -283,6 +313,7 @@ export default function PricingPage() {
 
     setSaving(false);
 
+    setLoadingScenarios(true);
     await loadSavedScenarios();
   }
 
