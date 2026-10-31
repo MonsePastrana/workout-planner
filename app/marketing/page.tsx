@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import CampaignTools from "./campaign-tools";
+import SavedMarketingAssets from "./saved-marketing-assets";
 import {
   audiences,
   filterAssets,
@@ -512,13 +513,15 @@ export default function MarketingPage() {
         )}
       </section>
 
-      <CampaignTools onExport={downloadText} />
+           <CampaignTools onExport={downloadText} />
+
+      <SavedMarketingAssets onExport={downloadText} />
 
       <footer className="bg-purple-950 px-6 py-8 text-center text-sm leading-7 text-purple-100">
         <p>Workout Planner | Week 4</p>
         <p>
-          Prepared content and manual A/B comparison. Database saving is
-          not implemented yet.
+          Prepared content, manual A/B comparison, and guest-session
+          marketing storage.
         </p>
       </footer>
     </main>
