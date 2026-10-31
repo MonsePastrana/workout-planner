@@ -1,13 +1,9 @@
+
 "use client";
 
 import Link from "next/link";
-import {
-  useReducer,
-  useState,
-  type FormEvent,
-  type ReactNode,
-} from "react";
-
+import { useReducer, useState, type FormEvent, type ReactNode } from "react";
+import ChatFeedback from "./chat-feedback";
 import {
   answerQuestion,
   buildGuidance,
@@ -42,9 +38,7 @@ type Action =
   | { type: "level"; value: Level }
   | { type: "days"; value: DayOption | "" }
   | { type: "duration"; value: DurationOption | "" }
-  | { type: "complete" }
-  | { type: "confirm" }
-  | { type: "reset" };
+  | { type: "complete" | "confirm" | "reset" };
 
 const initialState: ChatState = {
   step: 0,
@@ -59,33 +53,19 @@ function reducer(state: ChatState, action: Action): ChatState {
   if (action.type === "reset") return initialState;
 
   if (action.type === "goal" && state.step === 0) {
-    return {
-      ...state,
-      goal: action.value,
-      step: 1,
-    };
+    return { ...state, goal: action.value, step: 1 };
   }
 
   if (action.type === "level" && state.step === 1) {
-    return {
-      ...state,
-      level: action.value,
-      step: 2,
-    };
+    return { ...state, level: action.value, step: 2 };
   }
 
   if (action.type === "days" && state.step === 2) {
-    return {
-      ...state,
-      days: action.value,
-    };
+    return { ...state, days: action.value };
   }
 
   if (action.type === "duration" && state.step === 2) {
-    return {
-      ...state,
-      duration: action.value,
-    };
+    return { ...state, duration: action.value };
   }
 
   if (
@@ -96,17 +76,11 @@ function reducer(state: ChatState, action: Action): ChatState {
     state.days &&
     state.duration
   ) {
-    return {
-      ...state,
-      step: 3,
-    };
+    return { ...state, step: 3 };
   }
 
   if (action.type === "confirm" && state.step === 3) {
-    return {
-      ...state,
-      confirmed: true,
-    };
+    return { ...state, confirmed: true };
   }
 
   return state;
@@ -138,17 +112,12 @@ function Message({
 
 export default function ChatPage() {
   const [state, dispatch] = useReducer(reducer, initialState);
-
   const [question, setQuestion] = useState("");
-  const [reply, setReply] = useState<ReturnType<
-    typeof answerQuestion
-  > | null>(null);
+  const [responseSerial, setResponseSerial] = useState(0);
+  const [reply, setReply] = useState<ReturnType<typeof answerQuestion> | null>(null);
 
   const intake: Intake | null =
-    state.goal &&
-    state.level &&
-    state.days &&
-    state.duration
+    state.goal && state.level && state.days && state.duration
       ? {
           goal: state.goal,
           level: state.level,
@@ -161,10 +130,7 @@ export default function ChatPage() {
     ["Goal", state.goal],
     ["Experience", state.level],
     ["Days per week", state.days],
-    [
-      "Duration",
-      state.duration ? `${state.duration} minutes` : "",
-    ],
+    ["Duration", state.duration ? `${state.duration} minutes` : ""],
   ];
 
   function askQuestion(event: FormEvent<HTMLFormElement>) {
@@ -173,22 +139,21 @@ export default function ChatPage() {
     if (!intake || !state.confirmed) return;
 
     setReply(answerQuestion(question, intake));
+    setResponseSerial((value) => value + 1);
   }
 
   function restart() {
     dispatch({ type: "reset" });
     setQuestion("");
     setReply(null);
+    setResponseSerial(0);
   }
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
       <header className="border-b border-zinc-200 bg-white px-6 py-5">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4">
-          <Link
-            href="/"
-            className="text-xl font-black text-purple-800"
-          >
+          <Link href="/" className="text-xl font-black text-purple-800">
             Workout Planner
           </Link>
 
@@ -217,21 +182,17 @@ export default function ChatPage() {
         </h1>
 
         <p className="mt-4 max-w-3xl leading-7 text-zinc-600">
-          Answer three questions about your workout planning
-          preferences. This assistant uses predefined rules, not a
-          live AI model.
+          Answer three questions about your workout planning preferences.
+          This assistant uses predefined rules, not a live AI model.
         </p>
 
         <p className="mt-4 rounded-xl bg-purple-50 p-4 text-sm leading-6 text-purple-900">
-          Do not enter medical information. This tool supports
-          workout organization and does not replace a trainer,
-          doctor, or other qualified professional.
+          Do not enter medical information. This tool supports workout
+          organization and does not replace a trainer, doctor, or other
+          qualified professional.
         </p>
 
-        <ol
-          aria-label="Conversation"
-          className="mt-8 space-y-4"
-        >
+        <ol aria-label="Conversation" className="mt-8 space-y-4">
           <Message>
             Hi! First, what is your workout planning goal?
           </Message>
@@ -239,37 +200,29 @@ export default function ChatPage() {
           {state.step >= 1 && (
             <>
               <Message user>{state.goal}</Message>
-
-              <Message>
-                What is your experience level?
-              </Message>
+              <Message>What is your experience level?</Message>
             </>
           )}
 
           {state.step >= 2 && (
             <>
               <Message user>{state.level}</Message>
-
               <Message>
-                What schedule works for you? Choose training
-                days per week and a preferred workout duration.
+                What schedule works for you? Choose training days per week
+                and a preferred workout duration.
               </Message>
             </>
           )}
 
           {state.step === 3 && (
             <Message user>
-              {state.days} days per week, {state.duration} minutes
-              per workout.
+              {state.days} days per week, {state.duration} minutes per workout.
             </Message>
           )}
         </ol>
 
         <section className="mt-8 rounded-2xl border border-zinc-200 bg-white p-6">
-          <h2
-            role="status"
-            className="text-xl font-bold"
-          >
+          <h2 role="status" className="text-xl font-bold">
             {state.step < 3
               ? `Question ${state.step + 1} of 3`
               : "Intake complete"}
@@ -282,12 +235,7 @@ export default function ChatPage() {
                   key={goal}
                   type="button"
                   className={button}
-                  onClick={() =>
-                    dispatch({
-                      type: "goal",
-                      value: goal,
-                    })
-                  }
+                  onClick={() => dispatch({ type: "goal", value: goal })}
                 >
                   {goal}
                 </button>
@@ -302,12 +250,7 @@ export default function ChatPage() {
                   key={level}
                   type="button"
                   className={button}
-                  onClick={() =>
-                    dispatch({
-                      type: "level",
-                      value: level,
-                    })
-                  }
+                  onClick={() => dispatch({ type: "level", value: level })}
                 >
                   {level}
                 </button>
@@ -320,10 +263,7 @@ export default function ChatPage() {
               className="mt-5"
               onSubmit={(event) => {
                 event.preventDefault();
-
-                dispatch({
-                  type: "complete",
-                });
+                dispatch({ type: "complete" });
               }}
             >
               <div className="grid gap-5 sm:grid-cols-2">
@@ -337,18 +277,14 @@ export default function ChatPage() {
                     onChange={(event) =>
                       dispatch({
                         type: "days",
-                        value: event.target
-                          .value as DayOption | "",
+                        value: event.target.value as DayOption | "",
                       })
                     }
                   >
                     <option value="">Choose days</option>
 
                     {days.map((value) => (
-                      <option
-                        key={value}
-                        value={value}
-                      >
+                      <option key={value} value={value}>
                         {value} days
                       </option>
                     ))}
@@ -365,20 +301,14 @@ export default function ChatPage() {
                     onChange={(event) =>
                       dispatch({
                         type: "duration",
-                        value: event.target
-                          .value as DurationOption | "",
+                        value: event.target.value as DurationOption | "",
                       })
                     }
                   >
-                    <option value="">
-                      Choose duration
-                    </option>
+                    <option value="">Choose duration</option>
 
                     {durations.map((value) => (
-                      <option
-                        key={value}
-                        value={value}
-                      >
+                      <option key={value} value={value}>
                         {value} minutes
                       </option>
                     ))}
@@ -389,9 +319,7 @@ export default function ChatPage() {
               <button
                 type="submit"
                 className={`mt-5 ${button}`}
-                disabled={
-                  !state.days || !state.duration
-                }
+                disabled={!state.days || !state.duration}
               >
                 Finish intake
               </button>
@@ -410,9 +338,7 @@ export default function ChatPage() {
                       {label}
                     </dt>
 
-                    <dd className="mt-2 font-bold">
-                      {value}
-                    </dd>
+                    <dd className="mt-2 font-bold">{value}</dd>
                   </div>
                 ))}
               </dl>
@@ -424,19 +350,15 @@ export default function ChatPage() {
                   </p>
 
                   <p className="mt-2 text-sm leading-7 text-amber-900">
-                    Review these preferences before the assistant
-                    provides guidance. You remain responsible for
-                    deciding whether the selections are correct.
+                    Review these preferences before the assistant provides
+                    guidance. You remain responsible for deciding whether
+                    the selections are correct.
                   </p>
 
                   <button
                     type="button"
                     className={`mt-4 ${button}`}
-                    onClick={() =>
-                      dispatch({
-                        type: "confirm",
-                      })
-                    }
+                    onClick={() => dispatch({ type: "confirm" })}
                   >
                     These preferences are correct
                   </button>
@@ -472,14 +394,11 @@ export default function ChatPage() {
             </h2>
 
             <p className="mt-3 text-sm leading-7 text-zinc-600">
-              Ask about your goal, experience, schedule,
-              duration, or next step.
+              Ask about your goal, experience, schedule, duration,
+              or next step.
             </p>
 
-            <form
-              onSubmit={askQuestion}
-              className="mt-5"
-            >
+            <form onSubmit={askQuestion} className="mt-5">
               <label className="text-sm font-semibold">
                 Your question
 
@@ -506,27 +425,28 @@ export default function ChatPage() {
 
             {reply && (
               <div
-                role={
-                  reply.category === "guardrail"
-                    ? "alert"
-                    : "status"
-                }
+                role={reply.category === "guardrail" ? "alert" : "status"}
                 className={`mt-6 rounded-xl p-5 ${
                   reply.category === "guardrail"
                     ? "border border-red-200 bg-red-50 text-red-900"
                     : "bg-purple-50 text-zinc-800"
                 }`}
               >
-                <p className="font-bold">
-                  {reply.title}
-                </p>
-
+                <p className="font-bold">{reply.title}</p>
                 <p className="mt-2 text-sm leading-7">
                   {reply.message}
                 </p>
               </div>
             )}
           </section>
+        )}
+
+        {state.confirmed && intake && (
+          <ChatFeedback
+            key={responseSerial}
+            intake={intake}
+            responseCategory={reply?.category ?? "initial"}
+          />
         )}
 
         <button
