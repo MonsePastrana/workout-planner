@@ -16,7 +16,23 @@ const roadmap = [
   { phase: "V2.3", idea: "Progress tracking for saved workouts", validation: "Add explicit consent, privacy controls, and usability tests." },
 ];
 
-const prompt = `okay quiero que trabajemos como le hemos estado haciendo, me mandas el código y hacemos los 5 commit, hay que hacerlo lo mas rápido posible que ya me quiero dormir`;
+const prompt = `ROLE:
+You are my disciplined AI-native product architect and coding partner.
+
+COURSE RULE:
+Do not let me code before the plan is clear.
+
+TASK:
+Develop Module 6: Integrated Agentic Venture + Impact & Viability for the existing Workout Planner application.
+
+IMPLEMENTATION SUMMARY:
+- Review the existing project structure and reuse previously implemented modules.
+- Integrate the existing pages through consistent navigation.
+- Build a guided /demo walkthrough and a /dashboard for session-scoped records.
+- Expand /docs with the Agent Map, impact and viability assessment, Version 2 roadmap, and build records.
+- Preserve the existing purple-and-white design and rule-based Guided Assistant.
+- Protect guest-session data and verify the application through testing and real user feedback.
+- Document at least five commits, two deployments, and an improvement after testing.`;
 
 const focus = "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-purple-700";
 
@@ -103,15 +119,15 @@ export default function DocsPage() {
         <section aria-labelledby="prompt-records">
           <h2 id="prompt-records" className="text-2xl font-black">Original Prompt &amp; Build Log</h2>
           <p className="mt-3 leading-7 text-zinc-700">
-            The original initial implementation brief was prepared before coding and is preserved
-            verbatim in the repository&apos;s prompt log. This actual user message also initiated the
-            five-commit coding workflow:
+            The initial implementation brief was prepared before coding. This concise,
+            professionally edited summary describes the planned scope and technical requirements.
+            The full original planning prompt is preserved in the linked repository log:
           </p>
           <blockquote className="mt-5 overflow-x-auto whitespace-pre-wrap break-words rounded-xl border border-purple-200 bg-purple-50 p-5 font-mono text-sm leading-7 text-zinc-800">
             {prompt}
           </blockquote>
           <a href="https://github.com/MonsePastrana/workout-planner/blob/main/docs/module6/prompt-log.md" target="_blank" rel="noopener noreferrer" className={`mt-5 inline-block font-bold text-purple-800 underline ${focus}`}>
-            Read full verbatim prompt log on GitHub
+            Read the original Module 6 planning prompt on GitHub
           </a>
           <p className="mt-4 text-sm text-zinc-600">
             The build plan and risk notes are in docs/module6/build-plan.md. Test results,
