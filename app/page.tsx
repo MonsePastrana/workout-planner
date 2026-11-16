@@ -8,6 +8,8 @@ const navigation = [
   { label: "Pricing", href: "/pricing" },
   { label: "Marketing", href: "/marketing" },
   { label: "Assistant", href: "/chat" },
+  { label: "Demo", href: "/demo" },
+  { label: "Dashboard", href: "/dashboard" },
   { label: "Docs", href: "/docs" },
 ];
 
@@ -45,6 +47,16 @@ const audiences = [
 ];
 
 const modules = [
+  {
+    title: "Guided Demo",
+    href: "/demo",
+    description: "Explore the main features with a six-step walkthrough.",
+  },
+  {
+    title: "Saved Activity Dashboard",
+    href: "/dashboard",
+    description: "Review guest-session assistant feedback and saved marketing assets.",
+  },
   {
     title: "Workout Generator",
     href: "/core",
