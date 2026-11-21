@@ -142,6 +142,23 @@ export default function DemoPage() {
           >
             {step.linkLabel}
           </Link>
+          <div
+            role="note"
+            className="mt-4 max-w-3xl rounded-xl border border-purple-200 bg-purple-50 px-4 py-3 text-sm leading-6 text-purple-950"
+          >
+            <p className="font-bold">How to continue</p>
+            {isLast ? (
+              <p className="mt-1">
+                Opening this feature is optional. Select <strong>{step.linkLabel}</strong> to explore it,
+                or choose <strong>Restart demo</strong> below to return to Step 1.
+              </p>
+            ) : (
+              <p className="mt-1">
+                Opening this feature is optional. Select <strong>{step.linkLabel}</strong> to explore it,
+                or choose <strong>Next step</strong> below to continue the guided walkthrough.
+              </p>
+            )}
+          </div>
         </article>
 
         <div className="mt-7 flex flex-wrap items-center justify-between gap-3">
